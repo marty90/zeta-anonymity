@@ -1,0 +1,59 @@
+from datetime import datetime, timedelta
+import json
+import numpy as np
+from utils import *
+import sys
+
+def run(Deltat, H, LRU, c, output, lines, observed_attributes, c_oa, t_oa):
+    i = 0
+    for line in open('trace_pdf.txt', 'r'):
+        i += 1
+        #read next input line
+        t, u, a = read_next_visit(line)
+        if i == 1:
+            t_start = t
+            
+        #manage data structure
+        manage_data_structure(t, u, a, H, LRU, c)
+        #evict old users
+        evict(t, H, LRU, c, Deltat)
+        #possibly outputs the data
+        check_and_output(t, u, a, c, output)
+        
+        if i%(lines/100) == 0: #save one hundred samples for monitoring
+            for oa in observed_attributes:
+                t_oa[oa].append(t)
+                c_oa[oa].append(c[oa] if oa in c else 0)
+        
+        if i == lines:
+            t_stop = t
+            break
+    print('End of simulation (simulated time: {})'.format(str(timedelta(seconds = int(t_stop - t_start)))))
+    return t_start, t_stop
+
+def main(lines):
+    # algorithm parameters
+    Deltat = 3600 #in seconds
+    #data structures
+    H = {}
+    LRU = {}
+    c = {}
+    output = []
+    #run parameters
+    observed_attributes = ['google.it', 'yahoo.com', 'gazzetta.it']
+    c_oa = {k:[] for k in observed_attributes} #a list of counters for the observed attributes
+    t_oa = {k:[] for k in observed_attributes} #the moments in which the counters have been evaluated
+    start, stop = run(Deltat, H, LRU, c, output, lines, observed_attributes, c_oa, t_oa)
+    
+    #save the output as file
+    f = open('simulation_output.txt', 'w+')
+    for record in output:
+        f.write("\t".join(str(x) for x in record[0]) + "\t" + str(record[1]) + '\n')
+    f.close()
+    g = open('output_params.json', 'w+')
+    g.write(json.dumps({'c_oa': c_oa, 't_oa': t_oa, 'start': start, 'observed_attributes': observed_attributes}))
+    g.close()
+
+if __name__ == '__main__':
+    lines = int(sys.argv[1])
+    main(lines)
