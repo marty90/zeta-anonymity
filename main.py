@@ -5,6 +5,21 @@ from utils import *
 import sys
 
 def run(Deltat, H, LRU, c, output, lines, observed_attributes, c_oa, t_oa):
+    """Function that calls all the methods for the implementation of the z-anon
+    
+    Input:
+    Deltat(int): the time period, in seconds
+    H(dict): the attributes' hash table
+    LRU(dict): FIFO lists of users, one per attribute
+    c(dict): the Python dictionary containing the counter value for every attribute
+    output(list): the list where to record the counter value for each input tuple
+    lines(int): the number of lines to read from the input file
+    observed_attibutes(list): list of attributes whose counter values are monitored over time
+    c_oa(dict): the Python dictionary containing the counter value for the observed attributes
+    t_oa(dict): the Python dictionary containing the timestamp for the corresponding counter value in c_oa
+    
+    Output:
+    t_start(int), t_stop(int): the start and end timestamp of the """
     i = 0
     for line in open('trace_pdf.txt', 'r'):
         i += 1
@@ -32,6 +47,11 @@ def run(Deltat, H, LRU, c, output, lines, observed_attributes, c_oa, t_oa):
     return t_start, t_stop
 
 def main(lines):
+    """Defines the simulation parameters. Writes valuable information from the simulation in files.
+    
+    Input:
+    lines(int): the number of lines to read from the input file
+    """
     # algorithm parameters
     Deltat = 3600 #in seconds
     #data structures
