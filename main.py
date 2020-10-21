@@ -67,9 +67,16 @@ def main(lines):
     
     #save the output as file
     f = open('simulation_output.txt', 'w+')
+    i=0
+    z=50
     for record in output:
-        f.write("\t".join(str(x) for x in record[0]) + "\t" + str(record[1]) + '\n')
+        for x in record[1]:
+            if(x >= z):
+                i+=1
+                break;   
+        f.write("__".join(str(x) for x in record[0])+ "__" + "__".join(str(x) for x in record[1]) + '\n')
     f.close()
+    print("Total records not anonymized with z = "+ str(z) + ": " + str(i))
     g = open('output_params.json', 'w+')
     g.write(json.dumps({'c_oa': c_oa, 't_oa': t_oa, 'start': start, 'observed_attributes': observed_attributes}))
     g.close()
