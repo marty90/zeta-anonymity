@@ -1,7 +1,12 @@
-def read_next_visit(line):
-    t, u, a = line.split(',')
-    t = float(t) /1000 #timestamps are stored in milliseconds in the file, bring them to seconds
-    a = a.strip()
+def read_next_visit(line, file):
+    if file == 'trace_products.txt':
+        t, u, a = line.split(',')
+        t = float(t)
+        a = a.strip()
+    elif file == 'trace_pdf.txt':
+        t, u, a = line.split('\t')
+        t = float(t) /1000 #timestamps are stored in milliseconds in the file, bring them to seconds
+        a = a.strip()
     return t, u, a
     
 def a_not_present(t, u, a, H, LRU, c):
@@ -40,17 +45,24 @@ def evict(t, H, LRU, c, Deltat):
         LRU.pop(a, None)
         H.pop(a, None)
         
-def manage_data_structure(t, u, a, H, LRU, c):
-    cat = a.split(".")
-    for i in cat:
-        if a not in H:
-            a_not_present(t, u, a, H, LRU, c)
+def manage_data_structure(t, u, a, H, LRU, c, file):
+    sep = '.'
+    if file == 'trace_pdf.txt':
+        sep = ' '
+    cat = a.split(sep)
+    for level in range(len(cat)):
+        i = '.'.join(cat[:level + 1])
+        if i not in H:
+            a_not_present(t, u, i, H, LRU, c)
         else:
-            a_present(t, u, a, H, LRU, c)
+            a_present(t, u, i, H, LRU, c)
         
-def check_and_output(t, u, a, c, output):
-    cat = a.split(".")
-    list = []
-    for i in reversed(cat):
-        list.append(c[i])
-    output.append(((t, u, a), list))
+def check_and_output(t, u, a, c, output, file):
+    sep = '.'
+    if file == 'trace_pdf.txt':
+        sep = ' '
+    cat = a.split(sep)
+    counters = []
+    for level in range(len(cat)):
+        counters.append(c['.'.join(cat[:level + 1])])
+    output.append(((t, u, a), counters))
