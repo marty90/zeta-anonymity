@@ -1,3 +1,19 @@
+def get_cell(lat, lon):
+    from pyproj import Transformer
+    import numpy as np
+    stepsize = np.array([5000, 50000, 100000])
+    from_ll_to_mt = Transformer.from_crs('epsg:4326', 'epsg:3857')
+    nw = from_ll_to_mt.transform(55, 3.5)
+    se = from_ll_to_mt.transform(47.5, 15.5)
+    point = from_ll_to_mt.transform(lat, lon)
+    distx = point[0] - nw[0]
+    disty = nw[1] - point[1]
+    cellx = (distx / stepsize).astype(int)
+    celly = (disty / stepsize).astype(int)
+    maxx = (np.ceil((se[0] - nw[0]) / stepsize)).astype(int)
+    cell = celly * maxx + cellx
+    return cell.tolist()
+
 def read_next_visit(line, file):
     if file == 'trace_products.txt':
         t, u, a = line.split(',')
@@ -7,6 +23,12 @@ def read_next_visit(line, file):
         t, u, a = line.split('\t')
         t = float(t) /1000 #timestamps are stored in milliseconds in the file, bring them to seconds
         a = a.strip()
+    elif file == 'trace_radiocell_de.csv':
+        t, u, lat, lon = line.split('\t')
+        t = float(t)
+        lat = float(lat)
+        lon = float(lon)
+        a = '.'.join(reversed([str(x) for x in get_cell(lat, lon)]))
     return t, u, a
     
 def a_not_present(t, u, a, H, LRU, c):
