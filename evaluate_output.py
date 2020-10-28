@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 from collections import defaultdict
+import pathlib
 
 def plot_ca():
     params = json.loads(open('output_params.json', 'r').read())
@@ -22,6 +23,9 @@ def plot_ca():
     plt.show()
 
 def get_pkanon_with_cat(output, z):
+    pathlib.Path('./output/').mkdir(parents=True, exist_ok=True) 
+    f = open('output/out_{:02d}.txt'.format(z), 'w+')
+    attribute_set = set()
     final_dataset = defaultdict(set)
     for o in output:
         record = o[0] #tuple in the form (timestamp, user, attribute)
@@ -32,10 +36,13 @@ def get_pkanon_with_cat(output, z):
                 if i == 0:
                     a = record[2] #if the most specific category satisfies the threshold, output the whole attribute
                 else:
-                    a = '.'.join(record[2].split('.')[:-i]) #else, remove the z-private specifications
+                    a = '*'.join(record[2].split('*')[:-i]) #else, remove the z-private specifications
                 final_dataset[record[1]].add(a)
+                if a not in attribute_set:
+                    attribute_set.add(a)
+                    f.write(a + '\n')
                 break
-       
+    f.close()
     final_dataset_inv = defaultdict(list)
     for k,v in final_dataset.items():
             final_dataset_inv[str(v)].append(k)
@@ -76,10 +83,10 @@ def pkanon_vs_z():
         k2.append(sum(ks[ks >= 2])/sum(ks))
         k3.append(sum(ks[ks >= 3])/sum(ks))
         k4.append(sum(ks[ks >= 4])/sum(ks))
-        ks_nocat = np.array([len(v) for v in get_pkanon_without_cat(output, z).values()])
-        k2_nocat.append(sum(ks_nocat[ks_nocat >= 2])/sum(ks_nocat)) 
+        #ks_nocat = np.array([len(v) for v in get_pkanon_without_cat(output, z).values()])
+        #k2_nocat.append(sum(ks_nocat[ks_nocat >= 2])/sum(ks_nocat))
     
-    plt.figure()
+    '''plt.figure()
     plt.xlabel('z')
     plt.ylabel('p_kanon')
     plt.plot(z_range, k2, label = 'w/ categories')
@@ -87,7 +94,7 @@ def pkanon_vs_z():
     plt.ylim(bottom = 0., top = 1.)
     plt.legend()
     plt.savefig('figures/pkanon_cat_nocat.pdf')
-    plt.show()
+    plt.show()'''
     
     plt.figure()
     plt.xlabel('z')

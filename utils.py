@@ -28,7 +28,15 @@ def read_next_visit(line, file):
         t = float(t)
         lat = float(lat)
         lon = float(lon)
-        a = '.'.join(reversed([str(x) for x in get_cell(lat, lon)]))
+        a = '*'.join(reversed([str(x) for x in get_cell(lat, lon)]))
+    elif file == 'trace_radiocell_de.txt':
+        try:
+            t, u, a = line.split('\t')
+            t = float(t)
+            a = a.strip()
+        except:
+            print(line)
+            raise ValueError
     return t, u, a
     
 def a_not_present(t, u, a, H, LRU, c):
@@ -68,23 +76,23 @@ def evict(t, H, LRU, c, Deltat):
         H.pop(a, None)
         
 def manage_data_structure(t, u, a, H, LRU, c, file):
-    sep = '.'
+    sep = '*'
     if file == 'trace_pdf.txt':
         sep = ' '
     cat = a.split(sep)
     for level in range(len(cat)):
-        i = '.'.join(cat[:level + 1])
+        i = '*'.join(cat[:level + 1])
         if i not in H:
             a_not_present(t, u, i, H, LRU, c)
         else:
             a_present(t, u, i, H, LRU, c)
         
 def check_and_output(t, u, a, c, output, file):
-    sep = '.'
+    sep = '*'
     if file == 'trace_pdf.txt':
         sep = ' '
     cat = a.split(sep)
     counters = []
     for level in range(len(cat)):
-        counters.append(c['.'.join(cat[:level + 1])])
+        counters.append(c['*'.join(cat[:level + 1])])
     output.append(((t, u, a), counters))
