@@ -17,9 +17,11 @@ class zanon(object):
         self.t_stop = 0
 
 	
-    def anonymize(self, line):
-                
-        t, u, a = read_next_visit(line)
+    def anonymize(self, tupla):
+        
+        t = float(tupla[0])
+        u = tupla[1]
+        a = tupla[2].strip()
             
         if self.t_start == 0:
             self.t_start = t
